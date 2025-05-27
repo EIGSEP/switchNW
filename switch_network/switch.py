@@ -67,7 +67,7 @@ class SwitchNetwork:
         self.redis = redis
         self.powerdown()
 
-    def switch(self, pathname, verify=False):
+    def switch(self, pathname, verify=True):
         """
         Set switches at given GPIO pins to the low/high power modes specified
         by paths. Returns the path that was set and if it matches the
