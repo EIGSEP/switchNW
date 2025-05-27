@@ -39,8 +39,8 @@ class SwitchNetwork:
         logger=None,
         redis=None,
     ):
-        """make a dictionary of the objects and their switch paths.
-        set up the software interfacing.
+        """
+        Initialize the SwitchNetwork class.
 
         Parameters
         ----------
@@ -66,7 +66,7 @@ class SwitchNetwork:
         self.redis = redis
         self.powerdown()
 
-    def switch(self, pathname, update_redis=False):
+    def switch(self, pathname):
         """
         Set switches at given GPIO pins to the low/high power modes specified
         by paths.
@@ -75,8 +75,6 @@ class SwitchNetwork:
         ----------
         pathname : str
             The key for the path you want to switch to.
-        update_redis : bool
-            If True, the current state will be pushed to Redis.
 
         """
         path = self.paths[pathname]
@@ -89,13 +87,8 @@ class SwitchNetwork:
         for idx, i in enumerate(self.gpios):
             self.logger.info(f"GPIO{i} set to {path[idx]}.")
 
-        if update_redis:
-            if self.redis is None:
-                self.logger.warning(
-                    "Redis instance not available. Skipping Redis update."
-                )
-            else:
-                self.redis.add_metadata("obs_mode", pathname)
+        if self.redis is not None:
+            self.redis.add_metadata("obs_mode", pathname)
 
     def powerdown(self):
         """
