@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 import serial
 import time
 
@@ -25,6 +24,9 @@ PATHS = {
     "RFN": "0000001",
     "RFANT": "0000000",
 }
+INV_PATHS = {v: k for k, v in PATHS.items()}
+LOW_POWER_PATH = "0000000"  # all GPIOs low
+LOW_POWER_PATHNAME = INV_PATHS[LOW_POWER_PATH]
 
 GPIOS = [2, 7, 1, 6, 3, 0, 4]
 
@@ -60,47 +62,74 @@ class SwitchNetwork:
             logger.setLevel(logging.INFO)
         self.logger = logger
         self.paths = paths  # will just need to write this by hand.
-        self.state = None  # state will initially be in the low power mode
         self.ser = serial.Serial(serport, 115200)
         self.gpios = gpios
         self.redis = redis
         self.powerdown()
 
-    def switch(self, pathname):
+    def switch(self, pathname, verify=False):
         """
         Set switches at given GPIO pins to the low/high power modes specified
-        by paths.
+        by paths. Returns the path that was set and if it matches the
+        path requested if ``verify'' is True.
 
         Parameters
         ----------
         pathname : str
             The key for the path you want to switch to.
+        verify : bool
+            If True, will verify the switch state after setting it.
+
+        Returns
+        -------
+        set_path : str
+            The path that was set. Only returned if ``verify'' is True.
+        set_pathname : str
+            The pathname corresponding to the set path. Only returned if
+            ``verify'' is True.
+        match : bool
+            If ``verify'' is True, returns whether the set path matches the
+            requested path.
 
         """
         path = self.paths[pathname]
+        if verify:
+            path = path + "!"  # add a verification character
         self.ser.write(path.encode())  # encode the path and write to the Pico
         time.sleep(0.02)  # wait for switch
-        pathsum = sum([int(i) for i in path])
-        self.state = (pathname, pathsum)
-
         self.logger.info(f"{pathname} is set.")
-        for idx, i in enumerate(self.gpios):
-            self.logger.info(f"GPIO{i} set to {path[idx]}.")
-
+        if verify:
+            t0 = time.time()
+            while True:
+                reply = self.ser.readline().decode().strip()
+                if reply.starswith("STATES"):
+                    break
+                if time.time() - t0 > 5:
+                    self.logger.error("No reply from the switch.")
+                    raise TimeoutError("No reply from the switch.")
+            set_path = reply.split(":")[1]  # get the path from the reply
+            match = set_path == path[:-1]  # remove the verification character
+            if match:
+                self.logger.info(f"Switch verified: {set_path}.")
+                set_pathname = pathname
+            else:
+                self.logger.error(f"Switch verification failed: {set_path}.")
+                set_pathname = INV_PATHS.get(set_path, "UNKNOWN")
+            obs_mode = set_pathname
+        else:
+            obs_mode = pathname
         if self.redis is not None:
-            self.redis.add_metadata("obs_mode", pathname)
+            self.redis.add_metadata("obs_mode", obs_mode)
+        if verify:
+            return set_path, set_pathname, match
 
-    def powerdown(self):
+    def powerdown(self, verify=False):
         """
-        Finds and switches to the lowest power mode in self.paths.
+        Switch to the low power state by setting all GPIOs to low.
 
         """
-        # call switch func on lowest power state.
-        states = np.array(list(self.paths.keys()))
-        pathstr = np.array(list(self.paths.values()))
+        self.logger.info("Switching to low power mode.")
+        path = self.switch(pathname=LOW_POWER_PATHNAME, verify=verify)
 
-        pathsums = np.array([sum([int(i) for i in path]) for path in pathstr])
-        lowpower = states[pathsums == min(pathsums)][0]
-        self.switch(pathname=lowpower)
-
-        time.sleep(0.1)
+        if verify:
+            return path
