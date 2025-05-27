@@ -70,8 +70,8 @@ class SwitchNetwork:
     def switch(self, pathname, verify=True):
         """
         Set switches at given GPIO pins to the low/high power modes specified
-        by paths. Returns the path that was set and if it matches the
-        path requested if ``verify'' is True.
+        by paths. Returns the path that was set, its corresponding pathname, 
+        and if it matches the path requested if ``verify'' is True.
 
         Parameters
         ----------
@@ -102,7 +102,7 @@ class SwitchNetwork:
             t0 = time.time()
             while True:
                 reply = self.ser.readline().decode().strip()
-                if reply.starswith("STATES"):
+                if reply.startswith("STATES"):
                     break
                 if time.time() - t0 > 5:
                     self.logger.error("No reply from the switch.")
