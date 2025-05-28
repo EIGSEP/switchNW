@@ -98,7 +98,8 @@ class SwitchNetwork:
         path = self.paths[pathname]
         if verify:
             path = path + "!"  # add a verification character
-        self.ser.write(path.encode())  # encode the path and write to the Pico
+        # encode the path and write to the Pico
+        self.ser.write(path.encode() + b"\n")
         time.sleep(0.02)  # wait for switch
         self.logger.info(f"{pathname} is set.")
         if verify:
