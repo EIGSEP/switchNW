@@ -5,6 +5,8 @@ This script gets copied to the pico and listens for commands from the Panda.
 import machine
 import sys
 
+DEBUG = False  # set to True to enable debug prints
+
 # set up the gpio switches
 PINS = [2, 7, 1, 6, 3, 0, 4]
 SETPINS = {
@@ -32,12 +34,14 @@ def set_switch_states(statestr, pins=SETPINS):
         statestr = statestr[:-1]  # remove the trailing ! character
     states = [int(i) for i in statestr]  # processes the command
     if len(states) != len(pins):
-        print("Not enough states for num of pins.")
+        if DEBUG:
+            print("Not enough states for num of pins.")
         return
 
     for pindex, state in enumerate(states):
         if state not in (0, 1):
-            print(f"invalid state value: {state}.")
+            if DEBUG:
+                print(f"invalid state value: {state}.")
             return
 
         # set the value of the pin at idx{pindex}
