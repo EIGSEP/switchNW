@@ -107,13 +107,13 @@ class SwitchNetwork:
         self.logger.info(f"{pathname} is set.")
         if verify:
             while True:
-                reply = self.ser.readline().decode().strip()
+                reply = self.ser.readline().decode()
                 if not reply:
                     self.logger.error("No reply from the switch.")
                     raise TimeoutError("No reply from the switch.")
                 if reply.startswith("STATES"):
                     break
-            set_path = reply.split(":")[1]  # get the path from the reply
+            set_path = reply.rstrip("\n").split(":")[1]  # remove prefix
             match = set_path == path[:-1]  # remove the verification character
             if match:
                 self.logger.info(f"Switch verified: {set_path}.")
