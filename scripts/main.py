@@ -4,7 +4,6 @@ This script gets copied to the pico and listens for commands from the Panda.
 
 import machine
 import sys
-import time
 
 # set up the gpio switches
 PINS = [2, 7, 1, 6, 3, 0, 4]
@@ -53,7 +52,6 @@ def set_switch_states(statestr, pins=SETPINS):
 
 while True:
     # read at most len(PINS) + verification character + newline
-    command = sys.stdin.readline(len(PINS)+2).strip()
+    command = sys.stdin.readline(len(PINS) + 2).strip()
     if command:
         set_switch_states(statestr=command, pins=SETPINS)
-    time.sleep(0.1)
