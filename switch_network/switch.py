@@ -114,6 +114,7 @@ class SwitchNetwork:
                 if reply.startswith("STATES"):
                     break
             set_path = reply.rstrip("\n").split(":")[1]  # remove prefix
+            set_path = set_path.strip()
             match = set_path == path[:-1]  # remove the verification character
             if match:
                 self.logger.info(f"Switch verified: {set_path}.")
