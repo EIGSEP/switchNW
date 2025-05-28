@@ -98,9 +98,12 @@ class SwitchNetwork:
         path = self.paths[pathname]
         if verify:
             path = path + "!"  # add a verification character
+        # clear the serial buffer
+        self.ser.reset_input_buffer()
         # encode the path and write to the Pico
         self.ser.write(path.encode() + b"\n")
-        time.sleep(0.02)  # wait for switch
+        self.ser.flush()
+        time.sleep(0.05)  # wait for switch
         self.logger.info(f"{pathname} is set.")
         if verify:
             while True:
