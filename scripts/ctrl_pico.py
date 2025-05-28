@@ -52,7 +52,8 @@ def set_switch_states(statestr, pins=SETPINS):
 
 
 while True:
-    command = sys.stdin.readline().strip()  # read a line from stdin
+    # read at most len(PINS) + verification character + newline
+    command = sys.stdin.readline(len(PINS)+2).strip()
     if command:
         set_switch_states(statestr=command, pins=SETPINS)
     time.sleep(0.1)
