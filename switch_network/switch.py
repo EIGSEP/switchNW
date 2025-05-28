@@ -38,6 +38,7 @@ class SwitchNetwork:
         gpios=GPIOS,
         paths=PATHS,
         serport="/dev/ttyACM0",
+        timeout=10,
         logger=None,
         redis=None,
     ):
@@ -52,6 +53,8 @@ class SwitchNetwork:
             Dictionary mapping path names to their corresponding switch states.
         serport : str
             Serial port for Pico connection.
+        timeout : float
+            Timeout for each blocking call to the serial port.
         logger : logging.Logger
         redis : eigsep_observing.EigsepRedis
             Redis instance to push observing modes to.
@@ -62,7 +65,7 @@ class SwitchNetwork:
             logger.setLevel(logging.INFO)
         self.logger = logger
         self.paths = paths  # will just need to write this by hand.
-        self.ser = serial.Serial(serport, 115200)
+        self.ser = serial.Serial(serport, 115200, timeout=timeout)
         self.gpios = gpios
         self.redis = redis
         self.powerdown()
@@ -70,7 +73,7 @@ class SwitchNetwork:
     def switch(self, pathname, verify=True):
         """
         Set switches at given GPIO pins to the low/high power modes specified
-        by paths. Returns the path that was set, its corresponding pathname, 
+        by paths. Returns the path that was set, its corresponding pathname,
         and if it matches the path requested if ``verify'' is True.
 
         Parameters
@@ -99,14 +102,13 @@ class SwitchNetwork:
         time.sleep(0.02)  # wait for switch
         self.logger.info(f"{pathname} is set.")
         if verify:
-            t0 = time.time()
             while True:
                 reply = self.ser.readline().decode().strip()
-                if reply.startswith("STATES"):
-                    break
-                if time.time() - t0 > 5:
+                if not reply:
                     self.logger.error("No reply from the switch.")
                     raise TimeoutError("No reply from the switch.")
+                if reply.startswith("STATES"):
+                    break
             set_path = reply.split(":")[1]  # get the path from the reply
             match = set_path == path[:-1]  # remove the verification character
             if match:
