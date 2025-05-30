@@ -8,7 +8,7 @@ import sys
 DEBUG = False  # set to True to enable debug prints
 
 # set up the gpio switches
-PINS = [2, 7, 1, 6, 3, 0, 4]
+PINS =[4, 3, 1, 0, 2, 6, 7] 
 SETPINS = {
     f"idx{pindex}": machine.Pin(PINS[pindex], machine.Pin.OUT)
     for pindex in range(len(PINS))
