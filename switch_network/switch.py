@@ -28,7 +28,7 @@ INV_PATHS = {v: k for k, v in PATHS.items()}
 LOW_POWER_PATH = "0000000"  # all GPIOs low
 LOW_POWER_PATHNAME = INV_PATHS[LOW_POWER_PATH]
 
-GPIOS = [2, 7, 1, 6, 3, 0, 4]
+GPIOS = [4, 3, 1, 0, 2, 6, 7]
 
 
 class SwitchNetwork:
