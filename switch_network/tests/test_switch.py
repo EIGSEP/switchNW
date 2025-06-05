@@ -1,4 +1,4 @@
-from switch_netwrk import SwitchNetwork
+from switch_network import SwitchNetwork
 
 class DummySwitchNetwork(SwitchNetwork):
     pass
