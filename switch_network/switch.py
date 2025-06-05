@@ -59,15 +59,25 @@ class SwitchNetwork:
         redis : eigsep_observing.EigsepRedis
             Redis instance to push observing modes to.
 
+        Raises
+        ------
+        ValueError
+            If the serial port cannot be opened.
+
         """
         if logger is None:
             logger = logging.getLogger(__name__)
             logger.setLevel(logging.INFO)
         self.logger = logger
-        self.paths = paths  # will just need to write this by hand.
-        self.ser = serial.Serial(serport, 115200, timeout=timeout)
+        self.paths = paths  # will just need to write this by hand
         self.gpios = gpios
         self.redis = redis
+        try:
+            self.ser = serial.Serial(serport, 115200, timeout=timeout)
+        except serial.SerialException as e:
+            error_msg = f"Could not open serial port {serport}: {e}"
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
 
     def switch(self, pathname, verify=True):
         """
