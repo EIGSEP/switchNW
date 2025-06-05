@@ -1,5 +1,7 @@
 # Switch Network Control
 
+[![codecov](https://codecov.io/gh/EIGSEP/switchNW/graph/badge.svg?token=9Z70IE4AQ8)](https://codecov.io/gh/EIGSEP/switchNW)
+
 > This repository holds a package and scripts for controlling the switch network EIGSEP will use for automatic calibration.
 
 **Installation**
