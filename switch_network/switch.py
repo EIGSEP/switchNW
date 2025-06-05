@@ -68,7 +68,6 @@ class SwitchNetwork:
         self.ser = serial.Serial(serport, 115200, timeout=timeout)
         self.gpios = gpios
         self.redis = redis
-        self.powerdown()
 
     def switch(self, pathname, verify=True):
         """
