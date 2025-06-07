@@ -1,4 +1,4 @@
-name: Switch Network - CI
+name: SwitchNetwork - CI
 
 on: [push, pull_request]
 
@@ -26,7 +26,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         run: |
-          pytest --cov=switch_network --cov-report=xml --junitxml=junit.xml -o junit_family=legacy switch_network/tests
+          pytest 
       - name: Upload coverage report
         uses: codecov/codecov-action@v5
         with:
@@ -37,4 +37,4 @@ jobs:
         uses: codecov/test-results-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-
+ 
