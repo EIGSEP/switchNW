@@ -1,6 +1,6 @@
 [flake8]
 max-line-length = 88
 extend-ignore = E203, W503
-
+exclude = scripts/test_scripts
 per-file-ignores =
-  src/mockserial/__init__.py: F401
+  src/switch_network/__init__.py: F401
