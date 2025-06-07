@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
   "pyserial",
+  "mockserial @ git+https://github.com/christianhbye/mockserial.git",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +27,6 @@ dev = [
   "flake8",
   "pytest",
   "pytest-cov",
-  "mockserial @ git+https://github.com/christianhbye/mockserial.git",
 ]
 
 [tool.setuptools.packages.find]
