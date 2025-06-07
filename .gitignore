@@ -1,4 +1,8 @@
-.venv/
+*.egg-info
+*__pycache__/
 build/
-*egg-info/
-**/__pycache__/
+
+.coverage
+*.xml
+
+.venv/
