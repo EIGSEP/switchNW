@@ -1,6 +1,5 @@
 import switch_network
 from switch_network.pico_utils import set_switch_states
-import utils
 
 
 def reset_pins(pins):
@@ -9,7 +8,10 @@ def reset_pins(pins):
 
 
 def test_set_switch_states():
-    pins = [utils.DummyPin(gpio) for gpio in switch_network.switch.GPIOS]
+    pins = [
+        switch_network.testing.DummyPin(gpio)
+        for gpio in switch_network.switch.GPIOS
+    ]
     for pathname, path in switch_network.switch.PATHS.items():
         set_switch_states(path, pins)
         for v, pin in zip(path, pins):
