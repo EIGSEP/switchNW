@@ -6,17 +6,13 @@ import machine
 import sys
 
 from switch_network.pico_utils import set_switch_states
+from switch_network.switch import GPIOS
 
 # set up the gpio switches
-PINS = [4, 3, 1, 0, 2, 6, 7]
-SETPINS = {
-    f"idx{pindex}": machine.Pin(PINS[pindex], machine.Pin.OUT)
-    for pindex in range(len(PINS))
-}
-
+SETPINS = [machine.Pin(gpio, machine.Pin.OUT) for gpio in GPIOS]
 
 while True:
-    # read at most len(PINS) + verification character + newline
-    command = sys.stdin.readline(len(PINS) + 2).strip()
+    # read at most len(GPIOS) + verification character + newline
+    command = sys.stdin.readline(len(GPIOS) + 2).strip()
     if command:
         set_switch_states(command, SETPINS)
