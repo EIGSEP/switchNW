@@ -115,15 +115,7 @@ class SwitchNetwork:
         time.sleep(0.05)  # wait for switch
         self.logger.info(f"{pathname} is set.")
         if verify:
-            while True:
-                reply = self.ser.readline().decode()
-                if not reply:
-                    self.logger.error("No reply from the switch.")
-                    raise TimeoutError("No reply from the switch.")
-                if reply.startswith("STATES"):
-                    break
-            set_path = reply.rstrip("\n").split(":")[1]  # remove prefix
-            set_path = set_path.strip()
+            set_path = self._verify_switch()
             match = set_path == path[:-1]  # remove the verification character
             if match:
                 self.logger.info(f"Switch verified: {set_path}.")
@@ -139,13 +131,53 @@ class SwitchNetwork:
         if verify:
             return set_path, set_pathname, match
 
+    def _verify_switch(self):
+        """
+        Verify the current switch state by reading from the serial port.
+
+        Returns
+        -------
+        set_path : str
+            The current path set on the switch.
+
+        Raises
+        ------
+        TimeoutError
+            If no reply is received from the switch before timeout.
+
+        ValueError
+            If the reply from the switch does not start with "STATES".
+
+        """
+        reply = self.ser.readline().decode()
+        if not reply:
+            self.logger.error("No reply from the switch.")
+            raise TimeoutError("No reply from the switch.")
+        if not reply.startswith("STATES"):
+            self.logger.error(f"Unexpected reply from switch: {reply}")
+            raise ValueError(f"Unexpected reply from switch: {reply}")
+        set_path = reply.rstrip("\n").split(":")[1]  # remove prefix
+        set_path = set_path.strip()
+        return set_path
+
     def powerdown(self, verify=False):
         """
         Switch to the low power state by setting all GPIOs to low.
 
+        Parameters
+        ----------
+        verify : bool
+            If True, will verify the switch state after setting it.
+
+        Returns
+        -------
+        path : str
+            The path that was set. Only returned if ``verify'' is True.
+
         """
         self.logger.info("Switching to low power mode.")
-        path = self.switch(pathname=LOW_POWER_PATHNAME, verify=verify)
+        out = self.switch(pathname=LOW_POWER_PATHNAME, verify=verify)
 
         if verify:
+            path = out[0]
             return path
