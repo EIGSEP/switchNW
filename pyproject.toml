@@ -45,4 +45,4 @@ addopts = [
 
 [tool.black]
 line-length = 79
-exclude = "scripts/test_scripts"
+extend-exclude = "scripts/test_scripts"
