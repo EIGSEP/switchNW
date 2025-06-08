@@ -29,9 +29,14 @@ class DummySwitchNetwork(SwitchNetwork):
     Mimic SwitchNetwork, but do not open a serial port.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """
         Initialize the DummySwitchNetwork with a mock serial connection.
+
+        Notes
+        -----
+        Input arguments are ignored, they are only here for
+        compatibility with the original SwitchNetwork class.
 
         """
         logger = logging.getLogger(__name__)
