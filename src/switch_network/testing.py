@@ -43,19 +43,18 @@ class DummySwitchNetwork(SwitchNetwork):
         logger.setLevel(logging.INFO)
         self.logger = logger
         self.paths = switch.PATHS
-        self.gpios = switch.GPIOS
         self.redis = None
         # create a dummy serial connection
         self.ser, self.pico = create_serial_connection(timeout=1)
         self._fail_switch = False  # simulate a failure in switching
         # create dummy setpins
-        self.setpins = [DummyPin(gpio) for gpio in self.gpios]
+        self.setpins = [DummyPin(gpio) for gpio in range(7)]
 
     def _do_switch_on_pico(self):
         """
         Simulate the pico switching.
         """
-        nread = len(self.gpios) + 2
+        nread = len(self.setpins) + 2
         command = self.pico.readline(nread).decode().strip()
         if command:
             if self._fail_switch:  # swap 0 and 1

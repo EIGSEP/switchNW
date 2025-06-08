@@ -6,8 +6,8 @@ import machine
 import sys
 
 from switch_network.pico_utils import set_switch_states
-from switch_network.switch import GPIOS
 
+GPIOS = [4, 3, 1, 0, 2, 6, 7]
 # set up the gpio switches
 SETPINS = [machine.Pin(gpio, machine.Pin.OUT) for gpio in GPIOS]
 

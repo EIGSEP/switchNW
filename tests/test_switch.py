@@ -20,7 +20,7 @@ def test_switch(dummy_switch):
     for pathname in dummy_switch.paths:
         path = dummy_switch.paths[pathname]
         dummy_switch.switch(pathname, verify=False)
-        nread = len(dummy_switch.gpios) + 2
+        nread = len(path) + 2
         read = dummy_switch.pico.readline(nread).strip().decode()
         assert read == path
     # verify switch states
@@ -55,7 +55,7 @@ def test_verify_switch(dummy_switch):
     with pytest.raises(TimeoutError):
         SwitchNetwork._verify_switch(dummy_switch)
     # send a path without STATES:
-    dummy_switch.pico.write(b"0" * len(dummy_switch.gpios) + b"\n")
+    dummy_switch.pico.write(b"0" * len(dummy_switch.setpins) + b"\n")
     with pytest.raises(ValueError):
         SwitchNetwork._verify_switch(dummy_switch)
 
@@ -71,4 +71,4 @@ def test_powerdown(dummy_switch):
     for pin in dummy_switch.setpins:
         pin.value(1)
     path = dummy_switch.powerdown(verify=True)
-    assert path == "0" * len(dummy_switch.gpios)
+    assert path == "0" * len(dummy_switch.setpins)

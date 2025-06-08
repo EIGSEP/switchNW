@@ -11,8 +11,6 @@ PATHS dictionary. The keys start with where the path starts: either RF
 (port connected to LNA) or VNA (port connected to the VNA), and end with the
 end of the path - ANT (antenna), O, S, L (OSL standards), or N (noise source).
 
-GPIOS list. gpio pin numbers - the index of the pin should correspond to the
-index of the state it should be in for each path in PATHS.
 """
 PATHS = {
     "VNAO": "1000000",
@@ -28,14 +26,11 @@ INV_PATHS = {v: k for k, v in PATHS.items()}
 LOW_POWER_PATH = "0000000"  # all GPIOs low
 LOW_POWER_PATHNAME = INV_PATHS[LOW_POWER_PATH]
 
-GPIOS = [4, 3, 1, 0, 2, 6, 7]
-
 
 class SwitchNetwork:
 
     def __init__(
         self,
-        gpios=GPIOS,
         paths=PATHS,
         serport="/dev/ttyACM0",
         timeout=10,
@@ -47,8 +42,6 @@ class SwitchNetwork:
 
         Parameters
         ----------
-        gpios : list
-            List of GPIO pins to be used for the switch network.
         paths : dict
             Dictionary mapping path names to their corresponding switch states.
         serport : str
@@ -70,7 +63,6 @@ class SwitchNetwork:
             logger.setLevel(logging.INFO)
         self.logger = logger
         self.paths = paths  # will just need to write this by hand
-        self.gpios = gpios
         self.redis = redis
         try:
             self.ser = serial.Serial(serport, 115200, timeout=timeout)
