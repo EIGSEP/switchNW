@@ -15,7 +15,18 @@ There are two interfaces to work with here. One is the Pi Pico and one is the La
 
 **Important**: The SwitchNetwork package and the scripts/main.py must be copied to the Pi Pico and live in the same directory.
 
-Both need to be hardcoded with the GPIO pin numbers, and the paths to each object.
+From a terminal, copy the package and the script to the Pico root:
+```shell
+mpremote devs  # list the devices to see where the Pico is connected
+# replace /dev/ttyACM0 with the output of the previous command
+mpremote connect /dev/ttyACM0 fs cp -r src/switch_network :/switch_network
+mpremote connect /dev/ttyACM0 fs cp -r scripts/main.py :/main.py  # script to run
+mpremote connect /dev/ttyACM0 reset   # rests the pico, so main.py stars automatically
+```
+
+Now main.py is running on the Pico and will start automatically on boot.
+
+
 For a three-switch network, one would change the main.py to use the right pin numbers in the list at the top. For example:
 ```
 pins = [0,1,2]
