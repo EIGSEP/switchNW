@@ -1,6 +1,0 @@
-cmt_vna==0.0.1
-machine==0.0.1
-matplotlib==3.10.1
-numpy==2.2.4
-pyserial==3.5
-setuptools==75.8.0
