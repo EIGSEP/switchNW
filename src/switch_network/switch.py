@@ -13,17 +13,19 @@ end of the path - ANT (antenna), O, S, L (OSL standards), or N (noise source).
 
 """
 PATHS = {
-    "VNAO": "1000000",
-    "VNAS": "1100000",
-    "VNAL": "0010000",
-    "VNAANT": "0000010",
-    "VNAN": "0000011",
-    "VNARF": "0001100",
-    "RFN": "0000001",
-    "RFANT": "0000000",
+    "VNAO": "10000000",
+    "VNAS": "11000000",
+    "VNAL": "00100000",
+    "VNAANT": "00000100",
+    "VNANON": "00000111",
+    "VNANOFF": "00000110",
+    "VNARF": "00011000",
+    "RFNON": "00000011",
+    "RFNOFF": "00000010",
+    "RFANT": "00000000",
 }
 INV_PATHS = {v: k for k, v in PATHS.items()}
-LOW_POWER_PATH = "0000000"  # all GPIOs low
+LOW_POWER_PATH = "00000000"  # all GPIOs low
 LOW_POWER_PATHNAME = INV_PATHS[LOW_POWER_PATH]
 
 
