@@ -48,7 +48,7 @@ class DummySwitchNetwork(SwitchNetwork):
         self.ser, self.pico = create_serial_connection(timeout=1)
         self._fail_switch = False  # simulate a failure in switching
         # create dummy setpins
-        self.setpins = [DummyPin(gpio) for gpio in range(7)]
+        self.setpins = [DummyPin(gpio) for gpio in range(8)]
 
     def _do_switch_on_pico(self):
         """
