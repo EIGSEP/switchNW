@@ -46,7 +46,7 @@ class DummySwitchNetwork(SwitchNetwork):
         self.redis = None
         # create a dummy serial connection
         self.ser, self.pico = create_serial_connection(timeout=1)
-        self._fail_switch = False  # simulate a failure in switching
+        self.fail_switch = False  # simulate a failure in switching
         # create dummy setpins
         self.setpins = [DummyPin(gpio) for gpio in range(7)]
 
@@ -57,7 +57,7 @@ class DummySwitchNetwork(SwitchNetwork):
         nread = len(self.setpins) + 2
         command = self.pico.readline(nread).decode().strip()
         if command:
-            if self._fail_switch:  # swap 0 and 1
+            if self.fail_switch:  # swap 0 and 1
                 c1 = command.replace("0", "2")  # swap 0 with 2
                 c2 = c1.replace("1", "0")  # swap 1 with 0
                 command = c2.replace("2", "1")  # swap 2 with 1
@@ -67,24 +67,23 @@ class DummySwitchNetwork(SwitchNetwork):
             if reply:
                 self.pico.write(reply.encode())
 
-    def _verify_switch(self):
+    def check_switch(self):
         """
         Override verify method by mocking a Pico switching and
-        responding. If the attribute _fail_switch is set to True,
+        responding. If the attribute fail_switch is set to True,
         it will simulate a failure in switching.
         """
         # this part is in scripts/main.py and runs on the Pico
         self._do_switch_on_pico()
         # run the verify method
-        return super()._verify_switch()
+        return super().check_switch()
 
-    def powerdown(self, verify=False):
+    def powerdown(self, verify=True):
         """
         Override powerdown method to simulate power down.
         """
-        if verify:  # calls do_switch already
+        if verify:  # calls _do_switch_on_pico under the hood
             return super().powerdown(verify=True)
-        # run the powerdown method
+        # need to call _do_switch_on_pico manually
         super().powerdown(verify=False)
-        # this part is in scripts/main.py and runs on the Pico
         self._do_switch_on_pico()

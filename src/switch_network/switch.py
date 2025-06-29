@@ -54,7 +54,7 @@ class SwitchNetwork:
 
         Raises
         ------
-        ValueError
+        RuntimeError
             If the serial port cannot be opened.
 
         """
@@ -69,13 +69,12 @@ class SwitchNetwork:
         except serial.SerialException as e:
             error_msg = f"Could not open serial port {serport}: {e}"
             self.logger.error(error_msg)
-            raise ValueError(error_msg)
+            raise RuntimeError(error_msg) from e
 
     def switch(self, pathname, verify=True):
         """
-        Set switches at given GPIO pins to the low/high power modes specified
-        by paths. Returns the path that was set, its corresponding pathname,
-        and if it matches the path requested if ``verify'' is True.
+        Set switches at given GPIO pins to the low/high power modes
+        specified by paths.
 
         Parameters
         ----------
@@ -84,15 +83,10 @@ class SwitchNetwork:
         verify : bool
             If True, will verify the switch state after setting it.
 
-        Returns
+        Raises
         -------
-        set_path : str
-            The path that was set. Only returned if ``verify'' is True.
-        set_pathname : str
-            The pathname corresponding to the set path. Only returned if
-            ``verify'' is True.
-        match : bool
-            If ``verify'' is True, returns whether the set path matches the
+        RuntimeError
+            If `verify` is True and the switch state does not match the
             requested path.
 
         """
@@ -107,25 +101,20 @@ class SwitchNetwork:
         time.sleep(0.05)  # wait for switch
         self.logger.info(f"{pathname} is set.")
         if verify:
-            set_path = self._verify_switch()
+            set_path = self.check_switch()
             match = set_path == path[:-1]  # remove the verification character
             if match:
                 self.logger.info(f"Switch verified: {set_path}.")
-                set_pathname = pathname
             else:
-                self.logger.error(f"Switch verification failed: {set_path}.")
-                set_pathname = INV_PATHS.get(set_path, "UNKNOWN")
-            obs_mode = set_pathname
-        else:
-            obs_mode = pathname
+                raise RuntimeError(
+                    f"Switch verification failed: {set_path} != {path[:-1]}."
+                )
         if self.redis is not None:
-            self.redis.add_metadata("obs_mode", obs_mode)
-        if verify:
-            return set_path, set_pathname, match
+            self.redis.add_metadata("obs_mode", pathname)
 
-    def _verify_switch(self):
+    def check_switch(self):
         """
-        Verify the current switch state by reading from the serial port.
+        Check the current switch state by reading from the serial port.
 
         Returns
         -------
@@ -152,7 +141,7 @@ class SwitchNetwork:
         set_path = set_path.strip()
         return set_path
 
-    def powerdown(self, verify=False):
+    def powerdown(self, verify=True):
         """
         Switch to the low power state by setting all GPIOs to low.
 
@@ -161,15 +150,6 @@ class SwitchNetwork:
         verify : bool
             If True, will verify the switch state after setting it.
 
-        Returns
-        -------
-        path : str
-            The path that was set. Only returned if ``verify'' is True.
-
         """
         self.logger.info("Switching to low power mode.")
-        out = self.switch(pathname=LOW_POWER_PATHNAME, verify=verify)
-
-        if verify:
-            path = out[0]
-            return path
+        self.switch(pathname=LOW_POWER_PATHNAME, verify=verify)
