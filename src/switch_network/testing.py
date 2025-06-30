@@ -1,8 +1,6 @@
-import logging
-
 from mockserial import create_serial_connection
 
-from . import switch, SwitchNetwork, pico_utils
+from . import SwitchNetwork, pico_utils
 
 
 class DummyPin:
