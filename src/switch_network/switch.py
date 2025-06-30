@@ -2,16 +2,8 @@ import logging
 import serial
 import time
 
-"""
-The SwitchNetwork class sends commands to the pico connected to the serport.
+logger = logging.getLogger(__name__)
 
-Hard-coded variables:
-
-PATHS dictionary. The keys start with where the path starts: either RF
-(port connected to LNA) or VNA (port connected to the VNA), and end with the
-end of the path - ANT (antenna), O, S, L (OSL standards), or N (noise source).
-
-"""
 PATHS = {
     "VNAO": "10000000",
     "VNAS": "11000000",
@@ -33,7 +25,6 @@ class SwitchNetwork:
         paths=PATHS,
         serport="/dev/ttyACM0",
         timeout=10,
-        logger=None,
         redis=None,
     ):
         """
@@ -47,7 +38,6 @@ class SwitchNetwork:
             Serial port for Pico connection.
         timeout : float
             Timeout for each blocking call to the serial port.
-        logger : logging.Logger
         redis : eigsep_observing.EigsepRedis
             Redis instance to push observing modes to.
 
@@ -57,9 +47,6 @@ class SwitchNetwork:
             If the paths do not have the same number of GPIO pins.
 
         """
-        if logger is None:
-            logger = logging.getLogger(__name__)
-            logger.setLevel(logging.INFO)
         self.logger = logger
         npins = len(next(iter(paths.values())))
         for path in paths.values():
