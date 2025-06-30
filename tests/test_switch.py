@@ -11,7 +11,15 @@ def dummy_switch():
     return switch_network.testing.DummySwitchNetwork()
 
 
-def test_init_failure(monkeypatch):
+def test_init_failure():
+    # different number of pins
+    path1 = "0" * 8
+    path2 = "0" * 7
+    paths = {"test_path1": path1, "test_path2": path2}
+    with pytest.raises(ValueError):
+        SwitchNetwork(paths=paths)
+
+def test_make_serial_failure(monkeypatch):
     def fake_serial(port, baudrate, timeout=None):
         raise serial.SerialException("Cannot open serial port")
 
@@ -19,6 +27,18 @@ def test_init_failure(monkeypatch):
     with pytest.raises(RuntimeError):
         SwitchNetwork()  # can't open serial port
 
+def test_init(dummy_switch):
+    # test with default settings
+    assert dummy_switch.paths == switch_network.switch.PATHS
+    npins = len(next(iter(switch_network.switch.PATHS.values())))
+    assert dummy_switch.npins == npins
+    assert dummy_switch.ser is not None
+    # test with custom paths
+    path1 = "0" * 8
+    path2 = "1" * 8
+    paths = {"test_path1": path1, "test_path2": path2}
+    custom_switch = switch_network.testing.DummySwitchNetwork(paths=paths)
+    assert custom_switch.paths == paths
 
 def test_switch(dummy_switch, mocker):
     # spy on check_switch
