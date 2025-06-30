@@ -55,6 +55,7 @@ def test_switch(dummy_switch, mocker):
         nread = len(path) + 2
         read = dummy_switch.pico.readline(nread).strip().decode()
         assert read == path
+    spy.reset_mock()  # reset spy for next test
     # verify switch states
     for pathname in dummy_switch.paths:
         path = dummy_switch.paths[pathname]
