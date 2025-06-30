@@ -19,6 +19,7 @@ def test_init_failure():
     with pytest.raises(ValueError):
         SwitchNetwork(paths=paths)
 
+
 def test_make_serial_failure(monkeypatch):
     def fake_serial(port, baudrate, timeout=None):
         raise serial.SerialException("Cannot open serial port")
@@ -26,6 +27,7 @@ def test_make_serial_failure(monkeypatch):
     monkeypatch.setattr(serial, "Serial", fake_serial)
     with pytest.raises(RuntimeError):
         SwitchNetwork()  # can't open serial port
+
 
 def test_init(dummy_switch):
     # test with default settings
@@ -39,6 +41,7 @@ def test_init(dummy_switch):
     paths = {"test_path1": path1, "test_path2": path2}
     custom_switch = switch_network.testing.DummySwitchNetwork(paths=paths)
     assert custom_switch.paths == paths
+
 
 def test_switch(dummy_switch, mocker):
     # spy on check_switch

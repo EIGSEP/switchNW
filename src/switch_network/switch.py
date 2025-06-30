@@ -89,7 +89,7 @@ class SwitchNetwork:
         -------
         ser : serial.Serial
             The serial connection object.
-        
+
         Raises
         ------
         RuntimeError
