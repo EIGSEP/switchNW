@@ -13,18 +13,17 @@ end of the path - ANT (antenna), O, S, L (OSL standards), or N (noise source).
 
 """
 PATHS = {
-    "VNAO": "1000000",
-    "VNAS": "1100000",
-    "VNAL": "0010000",
-    "VNAANT": "0000010",
-    "VNAN": "0000011",
-    "VNARF": "0001100",
-    "RFN": "0000001",
-    "RFANT": "0000000",
+    "VNAO": "10000000",
+    "VNAS": "11000000",
+    "VNAL": "00100000",
+    "VNAANT": "00000100",
+    "VNANON": "00000111",
+    "VNANOFF": "00000110",
+    "VNARF": "00011000",
+    "RFNON": "00000011",
+    "RFNOFF": "00000010",
+    "RFANT": "00000000",
 }
-INV_PATHS = {v: k for k, v in PATHS.items()}
-LOW_POWER_PATH = "0000000"  # all GPIOs low
-LOW_POWER_PATHNAME = INV_PATHS[LOW_POWER_PATH]
 
 
 class SwitchNetwork:
@@ -55,21 +54,55 @@ class SwitchNetwork:
         Raises
         ------
         ValueError
-            If the serial port cannot be opened.
+            If the paths do not have the same number of GPIO pins.
 
         """
         if logger is None:
             logger = logging.getLogger(__name__)
             logger.setLevel(logging.INFO)
         self.logger = logger
-        self.paths = paths  # will just need to write this by hand
+        npins = len(next(iter(paths.values())))
+        for path in paths.values():
+            if len(path) != npins:
+                raise ValueError(
+                    "All paths must have the same number of GPIO pins."
+                )
+        self.paths = paths
+        self.npins = npins
+        self.inv_paths = {v: k for k, v in paths.items()}
+        self.low_power_path = "0" * self.npins  # all GPIOs low
+        self.low_power_pathname = self.inv_paths[self.low_power_path]
+        self.ser = self._make_serial(serport, timeout=timeout)
         self.redis = redis
+
+    def _make_serial(self, serport, timeout=None):
+        """
+        Create a serial connection to the Pico.
+
+        Parameters
+        ----------
+        serport : str
+            The serial port to connect to.
+        timeout : float
+
+        Returns
+        -------
+        ser : serial.Serial
+            The serial connection object.
+        
+        Raises
+        ------
+        RuntimeError
+            If the serial port cannot be opened.
+
+        """
         try:
-            self.ser = serial.Serial(serport, 115200, timeout=timeout)
+            ser = serial.Serial(serport, 115200, timeout=timeout)
         except serial.SerialException as e:
             error_msg = f"Could not open serial port {serport}: {e}"
             self.logger.error(error_msg)
-            raise ValueError(error_msg)
+            raise RuntimeError(error_msg)
+        return ser
 
     def switch(self, pathname, verify=True):
         """
@@ -114,7 +147,7 @@ class SwitchNetwork:
                 set_pathname = pathname
             else:
                 self.logger.error(f"Switch verification failed: {set_path}.")
-                set_pathname = INV_PATHS.get(set_path, "UNKNOWN")
+                set_pathname = self.inv_paths.get(set_path, "UNKNOWN")
             obs_mode = set_pathname
         else:
             obs_mode = pathname
@@ -168,7 +201,7 @@ class SwitchNetwork:
 
         """
         self.logger.info("Switching to low power mode.")
-        out = self.switch(pathname=LOW_POWER_PATHNAME, verify=verify)
+        out = self.switch(pathname=self.low_power_pathname, verify=verify)
 
         if verify:
             path = out[0]
