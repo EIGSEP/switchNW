@@ -39,22 +39,23 @@ class DummySwitchNetwork(SwitchNetwork):
         compatibility with the original SwitchNetwork class.
 
         """
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
-        self.logger = logger
-        self.paths = switch.PATHS
+        super().__init__(*args, **kwargs)
         self.redis = None
-        # create a dummy serial connection
-        self.ser, self.pico = create_serial_connection(timeout=1)
         self._fail_switch = False  # simulate a failure in switching
-        # create dummy setpins
-        self.setpins = [DummyPin(gpio) for gpio in range(8)]
+        self.setpins = [DummyPin(gpio) for gpio in range(self.npins)]
+
+    def _make_serial(self, serport, timeout=None):
+        """
+        Create a dummy serial connection.
+        """
+        ser, self.pico = create_serial_connection(timeout=1)
+        return ser
 
     def _do_switch_on_pico(self):
         """
         Simulate the pico switching.
         """
-        nread = len(self.setpins) + 2
+        nread = self.npins + 2
         command = self.pico.readline(nread).decode().strip()
         if command:
             if self._fail_switch:  # swap 0 and 1
